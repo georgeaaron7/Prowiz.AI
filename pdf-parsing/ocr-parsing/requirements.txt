@@ -1,0 +1,14 @@
+numpy
+pandas
+sympy
+requests
+tabulate
+pdfplumber
+camelot-py[cv]
+pdf2image
+Pillow
+layoutparser[layoutmodels]
+torch
+torchvision
+opencv-python
+scikit-image
