@@ -1,0 +1,1 @@
+go to https://developer.adobe.com/console, sign-in and then create a project> add api> PDF services api. this should return a json file, then export your clinet keys into your env. using EXPORT and then run it normally.
