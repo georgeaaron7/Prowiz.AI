@@ -1,0 +1,2 @@
+download the required dependencies, you will also need to install layout parser and detectron2,
+the pdf will be taken from a data/ directory and stored in a output/ directory
