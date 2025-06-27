@@ -1,2 +1,7 @@
 download the required dependencies, you will also need to install layout parser and detectron2,
+  pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+  pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu121/torch2.2/index.html
+if you run into a subprocess error run these
+  python -m pip install --upgrade pip setuptools wheel
+  pip install python-core
 the pdf will be taken from a data/ directory and stored in a output/ directory
