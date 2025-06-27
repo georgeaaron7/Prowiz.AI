@@ -11,11 +11,9 @@ import torch
 import os
 import requests
 from urllib.parse import urlparse
-import fitz  # PyMuPDF as fallback for PDF processing
-
+import fitz 
 logger = logging.getLogger(__name__)
 
-# Try to import optional dependencies
 try:
     from pdf2image import convert_from_path
     PDF2IMAGE_AVAILABLE = True
@@ -68,7 +66,6 @@ class ParserEngine:
         self.ocr_utils = OCRUtils()
         self.layout_model = None
         
-        # Try to initialize LayoutParser model
         self._initialize_layout_model()
 
     def _initialize_layout_model(self):
@@ -79,17 +76,14 @@ class ParserEngine:
             self.layout_model = None
             return
             
-        # Check if LayoutParser should be disabled
         if os.getenv('DISABLE_LAYOUTPARSER'):
             logger.info("LayoutParser disabled by environment variable")
             self.layout_model = None
             return
         
         try:
-            # Updated LayoutParser API - use the correct model loading approach
             logger.info("Attempting to load LayoutParser model...")
             
-            # Try the updated API first
             try:
                 self.layout_model = lp.models.Detectron2LayoutModel(
                     config_path='lp://PubLayNet/mask_rcnn_X_101_32x8d_FPN_3x/config',
@@ -129,7 +123,6 @@ class ParserEngine:
             "metadata": {}
         }
 
-        # Check if file exists
         if not os.path.exists(pdf_path):
             logger.error(f"PDF file not found: {pdf_path}")
             return result
@@ -166,16 +159,13 @@ class ParserEngine:
         text_blocks = []
         tables = []
         
-        # Try multiple approaches for PDF processing
         images = self._convert_pdf_to_images(pdf_path)
         
         if images:
             text_blocks = self._extract_text_from_images(images)
         else:
-            # Fallback to direct PDF text extraction
             text_blocks = self._extract_text_from_pdf_direct(pdf_path)
 
-        # Extract tables using both methods
         camelot_tables = self.extract_tables_camelot(pdf_path)
         plumber_tables = self.extract_tables_plumber(pdf_path)
         tables = self.merge_tables(camelot_tables, plumber_tables)
@@ -189,7 +179,6 @@ class ParserEngine:
         
         if PDF2IMAGE_AVAILABLE:
             try:
-                # Try with different DPI settings
                 for dpi in [200, 150, 100]:
                     try:
                         images = convert_from_path(pdf_path, dpi=dpi)
@@ -205,7 +194,6 @@ class ParserEngine:
             except Exception as e:
                 logger.error(f"pdf2image failed completely: {e}")
         
-        # Fallback to PyMuPDF for image extraction
         try:
             logger.info("Trying PyMuPDF for PDF processing...")
             doc = fitz.open(pdf_path)
@@ -213,12 +201,10 @@ class ParserEngine:
             
             for page_num in range(len(doc)):
                 page = doc.load_page(page_num)
-                # Convert page to image
                 mat = fitz.Matrix(2.0, 2.0)  # 2x zoom
                 pix = page.get_pixmap(matrix=mat)
                 img_data = pix.tobytes("png")
                 
-                # Convert to PIL Image format that OCR can use
                 try:
                     from PIL import Image
                     import io
@@ -262,7 +248,6 @@ class ParserEngine:
                                 })
                 except Exception as e:
                     logger.error(f"Error processing page {idx + 1} with LayoutParser: {e}")
-                    # Fall back to full page OCR for this page
                     self._extract_full_page_ocr(image, idx + 1, text_blocks)
         else:
             logger.info("Using OCR-only text extraction")
@@ -290,7 +275,6 @@ class ParserEngine:
         """Extract text directly from PDF without images"""
         text_blocks = []
         
-        # Try pdfplumber first
         try:
             logger.info("Extracting text directly from PDF using pdfplumber")
             with pdfplumber.open(pdf_path) as pdf:
@@ -307,7 +291,6 @@ class ParserEngine:
         except Exception as e:
             logger.error(f"pdfplumber text extraction failed: {e}")
         
-        # Fallback to PyMuPDF
         if not text_blocks:
             try:
                 logger.info("Extracting text directly from PDF using PyMuPDF")
@@ -386,7 +369,6 @@ class ParserEngine:
         """Merge tables from different extraction methods, avoiding duplicates"""
         merged = camelot_tables[:]
         for pt in plumber_tables:
-            # Check if this table is similar to any existing camelot table
             is_duplicate = False
             for ct in camelot_tables:
                 if (abs(pt["page"] - ct["page"]) == 0 and 
@@ -408,7 +390,6 @@ class ParserEngine:
             r'(?i)in\s+table\s+(\d+)', r'(?i)table\s+(\d+)\s+shows', r'(?i)as\s+shown\s+in\s+table\s+(\d+)'
         ]
         
-        # Group tables by page for efficient lookup
         tables_by_page = {}
         for t in tables:
             tables_by_page.setdefault(t["page"], []).append(t)
@@ -422,11 +403,10 @@ class ParserEngine:
                         ref_text = match.group(0)
                         ref_tables = tables_by_page.get(page, [])
                         
-                        # Try to find the referenced table
                         target_table = None
                         if len(ref_tables) >= table_num:
                             target_table = ref_tables[table_num - 1]
-                        elif ref_tables:  # If table number doesn't match exactly, use first table on page
+                        elif ref_tables:  
                             target_table = ref_tables[0]
                         
                         if target_table:
@@ -449,7 +429,6 @@ class ParserEngine:
 
     def extract_formulas(self, text_blocks: List[Dict]) -> List[Dict[str, Any]]:
         formulas = []
-        # Patterns for mathematical expressions
         math_patterns = [
             r'[a-zA-Z]\s*=\s*[^=]+',  # Basic equations
             r'\b\w+\s*\(\s*\w+\s*\)',  # Functions
@@ -460,12 +439,10 @@ class ParserEngine:
         for block in text_blocks:
             text = block["text"]
             
-            # Check for mathematical patterns first
             has_math = any(re.search(pattern, text) for pattern in math_patterns)
             
             if has_math:
                 try:
-                    # Try to parse with sympy
                     expr = sympify(text)
                     formulas.append({
                         "formula_text": text,
@@ -476,7 +453,6 @@ class ParserEngine:
                         "confidence": 0.9
                     })
                 except Exception:
-                    # If sympy fails, still add as potential formula if it matches patterns
                     formulas.append({
                         "formula_text": text,
                         "parsed": None,
@@ -501,7 +477,6 @@ class ParserEngine:
                 if not headers:
                     continue
                     
-                # Find matching variables in table headers
                 matched_vars = []
                 for var in variables:
                     var_lower = var.lower().strip()
