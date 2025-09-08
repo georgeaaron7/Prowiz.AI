@@ -1,29 +1,18 @@
-# requirements.txt
-# PDF Processing
 pdf2image
 Pillow
 
-# Computer Vision and OCR
 opencv-python
 pytesseract
 easyocr
-# Mathematical Processing
 sympy
 numpy
 
-# Machine Learning and Embeddings
 sentence-transformers
 torch
 transformers
 
-# Vector Database
 qdrant-client
 
-# Database
-# sqlite3  # Built-in with Python
-
-# Image processing
 scikit-image
 
-# Data processing
 pandas
