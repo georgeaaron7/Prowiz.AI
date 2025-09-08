@@ -1,4 +1,4 @@
-# formula_processor.py
+
 import sqlite3
 import json
 import re
