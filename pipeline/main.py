@@ -1,4 +1,3 @@
-# gpu_optimized_main.py
 import os
 import sys
 import argparse
