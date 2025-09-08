@@ -1,4 +1,3 @@
-# gpu_optimized_vector_store_manager.py
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 import sqlite3
