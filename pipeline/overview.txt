@@ -5,3 +5,7 @@ how it works:
   stores the formulas and tables in an sqlite database
   text in qdrant vector db 
   and the retreiveing is done by going through the sql db and the vector db
+
+run using main.py [-h] [--output_dir OUTPUT_DIR] [--db_path DB_PATH] [--dpi DPI] [--no_query] [--gpu_mode {auto,force,disable}] [--batch_size BATCH_SIZE]
+                [--ocr_mode {lightweight,cpu_accurate,gpu_optimized}] [--low_memory]
+                pdf_path
