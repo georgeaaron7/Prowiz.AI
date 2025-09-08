@@ -1,4 +1,3 @@
-# pdf_converter.py
 import os
 import pdf2image
 from PIL import Image
