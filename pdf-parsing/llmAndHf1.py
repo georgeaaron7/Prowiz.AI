@@ -396,7 +396,7 @@ async def main():
     
     try:
         # Process document
-        document_path = "pluh/api-520.pdf"
+        document_path = "api-520.pdf"
         if Path(document_path).exists():
             await rag_system.process_and_store_document(document_path)
             
