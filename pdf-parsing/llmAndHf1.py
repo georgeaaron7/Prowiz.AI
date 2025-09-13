@@ -5,7 +5,6 @@ from typing import List, Dict, Any, Optional
 import numpy as np
 from pathlib import Path
 
-# Open source alternatives
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
