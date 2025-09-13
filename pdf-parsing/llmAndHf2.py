@@ -7,7 +7,6 @@ from pathlib import Path
 import hashlib
 import json
 
-# Open source alternatives
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
